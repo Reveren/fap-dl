@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "fap-dl"
+version = "0.1.0"
+description = "A command-line downloader for Fapello profiles."
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+authors = [
+	{ name = "Michael Horton" }
+]
+dependencies = [
+	"playwright>=1.55",
+	"requests>=2.32"
+]
+
+[project.scripts]
+fap-dl = "fap_dl.cli:main"
+
+[project.urls]
+Repository = "https://github.com/Reveren/fap-dl"
+
+[tool.setuptools.packages.find]
+where = ["src"]
