@@ -42,7 +42,7 @@ fap-dl PROFILE
 For example:
 
 ```bash
-fap-dl theatomicbabe
+fap-dl diamondnips-1
 ```
 
 You can also provide the full profile URL:
