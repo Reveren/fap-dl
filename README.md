@@ -44,7 +44,11 @@ fap-dl --help
 
 If you do not already have `pipx`, see the official pipx installation instructions:
 
-https://pipx.pypa.io/stable/installation/
+https://pipx.pypa.io/latest/how-to/install-pipx.html
+
+```bash
+brew install pipx
+```
 
 ### Install from GitHub
 
