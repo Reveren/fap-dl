@@ -1,43 +1,70 @@
 # fap-dl
 
-A command-line downloader for images and videos from Fapello profiles.
+A command-line downloader for downloading images and videos from Fapello profiles.
 
-`fap-dl` uses Chromium to discover the contents of a profile, then closes the
-browser and downloads the media directly.
+`fap-dl` discovers all available posts on a profile and downloads the media to your computer. It supports separate image and video folders, combined downloads, image-only or video-only modes, and automatically skips files that have already been downloaded.
 
 ## Features
 
-- Downloads images and videos
+- Downloads images and videos from Fapello profiles
+- Accepts either a profile name or full Fapello profile URL
 - Automatically discovers lazy-loaded posts
-- Detects video posts
-- Streams downloads directly to disk
-- Skips media that has already been downloaded
+- Downloads media directly to disk
+- Skips files that have already been downloaded
+- Stores images and videos in separate folders by default
+- Optional combined image/video folder
+- Image-only and video-only modes
 - Uses `.part` files for incomplete downloads
-- Separates images and videos by default
-- Supports combined output
-- Supports image-only and video-only downloads
-- Automatically installs the required Playwright Chromium browser when needed
+- Uses Chromium for profile discovery when necessary
+- Automatically installs the required Playwright Chromium browser
+- Maintains a persistent browser profile to reduce repeated Cloudflare challenges
+- Supports macOS, Windows, and Linux
 
 ## Requirements
 
 - Python 3.10 or newer
-- Internet connection
+- An internet connection
+- Chromium, which `fap-dl` can install automatically when first needed
 
-### Platform support
+## Installation
 
-`fap-dl` is currently developed and tested on macOS.
+### Recommended: pipx
 
-The underlying Python, Playwright, Chromium, and Requests components are
-cross-platform, so the program is expected to work on Linux and Windows as
-well. Linux and Windows have not yet been tested with this project.
+The recommended way to install `fap-dl` is with `pipx`:
+
+```bash
+pipx install fap-dl
+```
+
+Once installed, verify that it is available:
+
+```bash
+fap-dl --help
+```
+
+If you do not already have `pipx`, see the official pipx installation instructions:
+
+https://pipx.pypa.io/stable/installation/
+
+### Install from GitHub
+
+You can also install the latest version directly from GitHub:
+
+```bash
+pipx install git+https://github.com/Reveren/fap-dl.git
+```
+
+This may include changes newer than the current PyPI release.
 
 ## Usage
 
-Download a profile:
+The basic command is:
 
 ```bash
 fap-dl PROFILE
 ```
+
+`PROFILE` can be either a Fapello profile name or a full profile URL.
 
 For example:
 
@@ -45,125 +72,202 @@ For example:
 fap-dl diamondnips-1
 ```
 
-You can also provide the full profile URL:
+or:
 
 ```bash
 fap-dl https://fapello.com/diamondnips-1/
 ```
 
-By default, files are stored in:
+By default, files are downloaded to:
 
 ```text
-~/Downloads/fap-dl/PROFILE/
+~/Downloads/fap-dl/diamondnips-1/
 ├── images/
 └── videos/
 ```
 
-### Combined folder
-
-```bash
-fap-dl PROFILE --combined
-```
-
-### Images only
-
-```bash
-fap-dl PROFILE --images-only
-```
-
-### Videos only
-
-```bash
-fap-dl PROFILE --videos-only
-```
-
-### Custom output directory
-
-```bash
-fap-dl PROFILE --output ~/Desktop/media
-```
-
-This creates:
+## Options
 
 ```text
-~/Desktop/media/PROFILE/
+usage: fap-dl [-h] [--combined] [--images-only | --videos-only]
+			  [--output OUTPUT] profile
+
+Download images and videos from a Fapello profile.
+
+positional arguments:
+  profile          Fapello profile name or full profile URL
+
+options:
+  -h, --help       show this help message and exit
+  --combined       Store images and videos together instead of separate folders.
+  --images-only    Download images only.
+  --videos-only    Download videos only.
+  --output OUTPUT  Download directory. Default: ~/Downloads/fap-dl
 ```
 
-## Why does Chromium open?
+### Download images and videos
 
-Fapello is protected by Cloudflare and may challenge or block ordinary
-automated HTTP requests. During development, headless Chromium was also unable
-to access profile content reliably even when using a previously established
-browser session.
+```bash
+fap-dl diamondnips-1
+```
 
-For that reason, `fap-dl` briefly launches a normal, visible Chromium window.
-This allows the profile to load in a regular browser environment and also
-allows you to complete a Cloudflare verification challenge if one appears.
+This is the default behavior.
 
-Chromium is used only for the discovery stage:
+### Download images only
 
-1. Chromium opens the requested profile.
-2. `fap-dl` scrolls through the profile to discover all available posts.
-3. Images and video posts are identified.
-4. Browser session information is transferred to the downloader.
-5. Chromium closes.
-6. Images and videos are streamed directly to disk without keeping the
-   browser open.
+```bash
+fap-dl diamondnips-1 --images-only
+```
 
-Most runs should therefore require no interaction with the Chromium window.
-If Fapello presents a verification challenge, complete it in Chromium and
-follow the prompt in the terminal.
+### Download videos only
 
-Browser data is retained in:
+```bash
+fap-dl diamondnips-1 --videos-only
+```
+
+### Store everything in one folder
+
+```bash
+fap-dl diamondnips-1 --combined
+```
+
+Instead of separate `images` and `videos` directories, all media will be stored together.
+
+### Choose a different download location
+
+```bash
+fap-dl diamondnips-1 --output ~/Desktop/Fapello
+```
+
+The profile directory will be created inside the specified location.
+
+Options can also be combined:
+
+```bash
+fap-dl diamondnips-1 --videos-only --output ~/Desktop/Fapello
+```
+
+## Browser and Cloudflare
+
+Fapello may use Cloudflare protection that prevents profile discovery using normal HTTP requests or a headless browser.
+
+For this reason, `fap-dl` uses a visible Chromium browser when discovering profile content.
+
+The browser may briefly appear while the profile is being scanned. Once discovery is complete, normal media downloads are performed directly without keeping the browser open unnecessarily.
+
+On first use, `fap-dl` will attempt to install the Chromium browser required by Playwright if it is not already installed.
+
+Browser data is stored in:
 
 ```text
 ~/.fap-dl/browser/
 ```
 
-This allows browser session information to persist between runs and can reduce
-the need for repeated verification.
+This persistent browser profile allows cookies and other browser state to be reused between runs and may reduce repeated Cloudflare challenges.
 
-## Downloads and existing files
+If Cloudflare presents a verification screen, complete the verification in the Chromium window and allow `fap-dl` to continue.
 
-Existing non-empty media files are skipped. This makes it possible to run
-`fap-dl` against the same profile later and download newly discovered media
-without downloading the entire collection again.
+## Existing and Incomplete Downloads
 
-Downloads are streamed directly to disk rather than being held entirely in
-memory.
+`fap-dl` checks for files that have already been downloaded and skips them instead of downloading them again.
 
-While a file is downloading, it uses the `.part` extension:
+Downloads are initially written using a `.part` extension.
+
+For example:
 
 ```text
-example.mp4.part
+video.mp4.part
 ```
 
-After the download completes successfully, it becomes:
+After the download completes successfully, the file is renamed to its final filename:
 
 ```text
-example.mp4
+video.mp4
 ```
 
-This prevents an interrupted or incomplete download from being mistaken for a
-completed media file.
+This helps distinguish completed downloads from files that were interrupted before finishing.
 
-## Video fallback
+If you run `fap-dl` again, completed files will be skipped and missing media can be downloaded.
 
-Video URLs can normally be determined directly from the profile gallery.
+## Updating
 
-If a predicted video URL fails, `fap-dl` can reopen Chromium and inspect the
-individual post to locate its actual MP4 source. Multiple failed videos are
-handled in the same fallback browser session rather than opening a separate
-browser for each one.
+If you installed `fap-dl` from PyPI using pipx:
+
+```bash
+pipx upgrade fap-dl
+```
+
+To reinstall the latest version:
+
+```bash
+pipx reinstall fap-dl
+```
+
+If you installed directly from GitHub and want the newest GitHub version:
+
+```bash
+pipx install --force git+https://github.com/Reveren/fap-dl.git
+```
+
+## Uninstalling
+
+To remove `fap-dl`:
+
+```bash
+pipx uninstall fap-dl
+```
+
+The persistent browser data stored in `~/.fap-dl/` is separate from the Python package and may remain after uninstalling.
+
+If you no longer want that data, it can be removed manually.
+
+## Development
+
+Clone the repository:
+
+```bash
+git clone https://github.com/Reveren/fap-dl.git
+cd fap-dl
+```
+
+Create a virtual environment:
+
+```bash
+python3 -m venv .venv
+```
+
+Activate it on macOS or Linux:
+
+```bash
+source .venv/bin/activate
+```
+
+On Windows:
+
+```powershell
+.venv\Scripts\activate
+```
+
+Install the project in editable mode:
+
+```bash
+python -m pip install -e .
+```
+
+You can then run:
+
+```bash
+fap-dl --help
+```
 
 ## Disclaimer
 
-This project is not affiliated with or endorsed by Fapello.
+`fap-dl` is an independent open-source project and is not affiliated with, endorsed by, or associated with Fapello.
 
-Users are responsible for ensuring that their use of this software complies
-with applicable laws, copyright restrictions, website terms, and the rights
-of content creators.
+This software is provided for personal and educational use. Users are responsible for complying with applicable laws, website terms of service, and copyright restrictions.
+
+Only download content that you are legally permitted to access and save.
 
 ## License
 
-MIT
+This project is licensed under the MIT License. See the `LICENSE` file for details.
