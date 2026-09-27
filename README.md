@@ -73,19 +73,19 @@ fap-dl PROFILE
 For example:
 
 ```bash
-fap-dl diamondnips-1
+fap-dl diamondnips
 ```
 
 or:
 
 ```bash
-fap-dl https://fapello.com/diamondnips-1/
+fap-dl https://fapello.com/diamondnips/
 ```
 
 By default, files are downloaded to:
 
 ```text
-~/Downloads/fap-dl/diamondnips-1/
+~/Downloads/fap-dl/diamondnips/
 ├── images/
 └── videos/
 ```
@@ -112,7 +112,7 @@ options:
 ### Download images and videos
 
 ```bash
-fap-dl diamondnips-1
+fap-dl diamondnips
 ```
 
 This is the default behavior.
@@ -120,19 +120,19 @@ This is the default behavior.
 ### Download images only
 
 ```bash
-fap-dl diamondnips-1 --images-only
+fap-dl diamondnips --images-only
 ```
 
 ### Download videos only
 
 ```bash
-fap-dl diamondnips-1 --videos-only
+fap-dl diamondnips --videos-only
 ```
 
 ### Store everything in one folder
 
 ```bash
-fap-dl diamondnips-1 --combined
+fap-dl diamondnips --combined
 ```
 
 Instead of separate `images` and `videos` directories, all media will be stored together.
@@ -140,7 +140,7 @@ Instead of separate `images` and `videos` directories, all media will be stored 
 ### Choose a different download location
 
 ```bash
-fap-dl diamondnips-1 --output ~/Desktop/Fapello
+fap-dl diamondnips --output ~/Desktop/Fapello
 ```
 
 The profile directory will be created inside the specified location.
@@ -148,8 +148,10 @@ The profile directory will be created inside the specified location.
 Options can also be combined:
 
 ```bash
-fap-dl diamondnips-1 --videos-only --output ~/Desktop/Fapello
+fap-dl diamondnips --videos-only --output ~/Desktop/Fapello
 ```
+
+*If you are interested in my example model, add "-1" to her profile name.*
 
 ## Browser and Cloudflare
 
